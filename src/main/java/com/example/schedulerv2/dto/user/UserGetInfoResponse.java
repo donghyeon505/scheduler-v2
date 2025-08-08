@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 
 @Getter
-public class UserGetResponse {
+public class UserGetInfoResponse {
 
     private final Long id;
 
@@ -18,7 +18,7 @@ public class UserGetResponse {
 
     private final LocalDateTime modifiedAt;
 
-    public UserGetResponse(
+    public UserGetInfoResponse(
             Long id,
             String username,
             String email,
@@ -32,8 +32,8 @@ public class UserGetResponse {
         this.modifiedAt = modifiedAt;
     }
 
-    public static UserGetResponse toDto(User user) {
-        return new UserGetResponse(
+    public static UserGetInfoResponse toDto(User user) {
+        return new UserGetInfoResponse(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),

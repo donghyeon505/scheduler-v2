@@ -22,14 +22,14 @@ public class ScheduleService {
 
     // 일정 생성
     @Transactional
-    public ScheduleCreateResponse save(ScheduleCreateRequest request) {
+    public ScheduleCreateResponse save(ScheduleCreateRequest request, Long loginUserId) {
 
         // ID 값으로 user 찾기
-        User user = userRepository.findUserByIdOrElseThrow(request.getUserId());
+        User user = userRepository.findUserByIdOrElseThrow(loginUserId);
 
         // 일정 객체에 값 넣기
         Schedule schedule = new Schedule(request.getTitle(), request.getContent());
-        schedule.setUser(user);
+        schedule.assignUser(user);
 
         // 일정 저장
         Schedule savedSchedule = scheduleRepository.save(schedule);
@@ -64,13 +64,16 @@ public class ScheduleService {
 
     // 일정 수정
     @Transactional
-    public ScheduleUpdateResponse update(Long id, String title, String content) {
+    public ScheduleUpdateResponse update(Long id, String title, String content, Long loginUserId) {
 
         // ID 값 여부 체크
         checkId(id);
 
         // 선택 일정 조회
         Schedule findSchedule = scheduleRepository.findByIdOrElseThrow(id);
+
+        // 본인 게시물인지 확인
+        checkSchedule(findSchedule.getUser().getId(), loginUserId, "본인의 일정만 수정할 수 있습니다.");
 
         // 제목 null, 공백 체크
         if (title == null || title.isBlank()) {
@@ -83,8 +86,7 @@ public class ScheduleService {
         }
 
         // 일정 정보 업데이트
-        findSchedule.setTitle(title);
-        findSchedule.setContent(content);
+        findSchedule.update(title, content);
 
         // DB에 즉시 반영
         scheduleRepository.flush();
@@ -95,13 +97,16 @@ public class ScheduleService {
 
     // 일정 삭제
     @Transactional
-    public void delete(Long id) {
+    public void delete(Long id, Long loginUserId) {
 
         // ID 값 여부 체크
         checkId(id);
 
         // 선택 일정 조회
         Schedule findSchedule = scheduleRepository.findByIdOrElseThrow(id);
+
+        // 본인 게시물인지 확인
+        checkSchedule(findSchedule.getUser().getId(), loginUserId, "본인의 일정만 삭제할 수 있습니다.");
 
         // 일정 삭제
         scheduleRepository.delete(findSchedule);
@@ -119,6 +124,13 @@ public class ScheduleService {
     private void checkId(Long id) {
         if (id == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID는 필수 입력값입니다");
+        }
+    }
+
+    // 본인 게시물인지 체크
+    private void checkSchedule(Long scheduleOwnerId, Long loginUserId, String message) {
+        if (!scheduleOwnerId.equals(loginUserId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, message);
         }
     }
 }

@@ -1,19 +1,18 @@
 package com.example.schedulerv2.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @Entity
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Setter
     @Column(unique = true)
     private String username;
 
@@ -26,5 +25,9 @@ public class User extends BaseEntity {
         this.username = username;
         this.email = email;
         this.password = password;
+    }
+
+    public void update(String username) {
+        this.username = username;
     }
 }
