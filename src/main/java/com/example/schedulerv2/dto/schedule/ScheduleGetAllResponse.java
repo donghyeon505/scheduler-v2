@@ -1,4 +1,4 @@
-package com.example.schedulerv2.dto;
+package com.example.schedulerv2.dto.schedule;
 
 import com.example.schedulerv2.entity.Schedule;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 
 @Getter
-public class ScheduleCreateResponse {
+public class ScheduleGetAllResponse {
 
     private final Long id;
     private final String title;
@@ -15,7 +15,7 @@ public class ScheduleCreateResponse {
     private final LocalDateTime createdAt;
     private final LocalDateTime modifiedAt;
 
-    public ScheduleCreateResponse(
+    public ScheduleGetAllResponse(
             Long id,
             String title,
             String content,
@@ -31,8 +31,8 @@ public class ScheduleCreateResponse {
         this.modifiedAt = modifiedAt;
     }
 
-    public static ScheduleCreateResponse toDto(Schedule schedule) {
-        return new ScheduleCreateResponse(
+    public static ScheduleGetAllResponse toDto(Schedule schedule) {
+        return new ScheduleGetAllResponse(
                 schedule.getId(),
                 schedule.getTitle(),
                 schedule.getContent(),
