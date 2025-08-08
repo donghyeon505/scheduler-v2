@@ -1,6 +1,6 @@
 package com.example.schedulerv2.controller;
 
-import com.example.schedulerv2.dto.*;
+import com.example.schedulerv2.dto.user.*;
 import com.example.schedulerv2.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -39,14 +39,17 @@ public class UserController {
             @RequestBody UserUpdateRequest request
     ) {
 
-        UserUpdateResponse response = userService.updateUser(userId, request.getUsername());
+        UserUpdateResponse response = userService.updateUser(userId, request.getUsername(), request.getPassword());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     // 유저 삭제
     @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable long userId) {
-        userService.deleteUser(userId);
+    public void deleteUser(
+            @PathVariable long userId,
+            @RequestBody UserDeleteRequest request
+    ) {
+        userService.deleteUser(userId, request.getPassword());
     }
 }
