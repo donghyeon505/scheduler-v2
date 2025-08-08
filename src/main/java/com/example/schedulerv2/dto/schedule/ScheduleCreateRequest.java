@@ -9,11 +9,8 @@ public class ScheduleCreateRequest {
 
     private final String content;
 
-    private final Long userId;
-
-    public ScheduleCreateRequest(String title, String content, Long userId) {
+    public ScheduleCreateRequest(String title, String content) {
         this.title = title;
         this.content = content;
-        this.userId = userId;
     }
 }

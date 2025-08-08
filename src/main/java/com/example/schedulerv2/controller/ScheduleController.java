@@ -2,6 +2,8 @@ package com.example.schedulerv2.controller;
 
 import com.example.schedulerv2.dto.schedule.*;
 import com.example.schedulerv2.service.ScheduleService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +20,19 @@ public class ScheduleController {
 
     // 일정 생성
     @PostMapping
-    public ResponseEntity<ScheduleCreateResponse> createSchedule(@RequestBody ScheduleCreateRequest request) {
+    public ResponseEntity<ScheduleCreateResponse> createSchedule(
+            @RequestBody ScheduleCreateRequest scheduleRequest,
+            HttpServletRequest request
+    ) {
 
-        ScheduleCreateResponse response = scheduleService.save(request);
+        // session 에서 loginUserId 가져오기
+        HttpSession session = request.getSession(false);
+        Long loginUserId = (Long) session.getAttribute("LOGIN_USER");
+
+        ScheduleCreateResponse response = scheduleService.save(
+                scheduleRequest,
+                loginUserId
+        );
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -35,31 +47,48 @@ public class ScheduleController {
     }
 
     // 선택 일정 조회
-    @GetMapping("/{id}")
-    public ResponseEntity<ScheduleGetOneResponse> findById(@PathVariable long id) {
+    @GetMapping("/{scheduleId}")
+    public ResponseEntity<ScheduleGetOneResponse> findById(@PathVariable Long scheduleId) {
 
-        ScheduleGetOneResponse response = scheduleService.findById(id);
+        ScheduleGetOneResponse response = scheduleService.findById(scheduleId);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     // 일정 수정
-    @PutMapping("/{id}")
+    @PutMapping("/{scheduleId}")
     public ResponseEntity<ScheduleUpdateResponse> update(
-            @PathVariable long id,
-            @RequestBody ScheduleUpdateRequest request
+            @PathVariable Long scheduleId,
+            @RequestBody ScheduleUpdateRequest scheduleRequest,
+            HttpServletRequest request
     ) {
 
-        ScheduleUpdateResponse response = scheduleService.update(id, request.getTitle(), request.getContent());
+        // session 에서 loginUserId 가져오기
+        HttpSession session = request.getSession(false);
+        Long loginUserId = (Long) session.getAttribute("LOGIN_USER");
+
+        ScheduleUpdateResponse response = scheduleService.update(
+                scheduleId,
+                scheduleRequest.getTitle(),
+                scheduleRequest.getContent(),
+                loginUserId
+        );
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     // 일정 삭제
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable long id) {
+    @DeleteMapping("/{scheduleId}")
+    public void delete(
+            @PathVariable Long scheduleId,
+            HttpServletRequest request
+    ) {
 
-        scheduleService.delete(id);
+        // session 에서 loginUserId 가져오기
+        HttpSession session = request.getSession(false);
+        Long loginUserId = (Long) session.getAttribute("LOGIN_USER");
+
+        scheduleService.delete(scheduleId, loginUserId);
     }
 
 }

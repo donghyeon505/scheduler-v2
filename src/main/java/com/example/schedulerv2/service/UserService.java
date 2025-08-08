@@ -1,9 +1,6 @@
 package com.example.schedulerv2.service;
 
-import com.example.schedulerv2.dto.user.UserCreateRequest;
-import com.example.schedulerv2.dto.user.UserCreateResponse;
-import com.example.schedulerv2.dto.user.UserGetResponse;
-import com.example.schedulerv2.dto.user.UserUpdateResponse;
+import com.example.schedulerv2.dto.user.*;
 import com.example.schedulerv2.entity.User;
 import com.example.schedulerv2.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +15,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    // 유저 생성
+    // 회원가입
     @Transactional
     public UserCreateResponse create(UserCreateRequest userCreateRequest) {
 
@@ -36,29 +33,46 @@ public class UserService {
         return UserCreateResponse.toDto(savedUser);
     }
 
-    // 유저 찾기
+    // 로그인
     @Transactional (readOnly = true)
-    public UserGetResponse findById(Long id) {
+    public User login(String email, String password) {
 
-        // ID 값 여부 체크
-        checkId(id);
+        // 필수 값 여부 체크
+        if (email == null || email.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이메일은 필수 값입니다.");
+        }
 
-        // 유저 여부 체크
-        User user = userRepository.findUserByIdOrElseThrow(id);
+        if (password == null || password.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "비밀번호는 필수 값입니다.");
+        }
 
-        // 유저 정보 반환
-        return UserGetResponse.toDto(user);
+        // 해당 이메일의 유저가 있는지 체크
+        User user = userRepository.findUserByEmailOrElseThrow(email);
+
+        // 해당 유저의 비밀번호 일치여부
+        if (!user.getPassword().equals(password)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일이나 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 반환
+        return user;
     }
 
-    // 유저 닉네임 수정
+    // 본인 계정 정보 보기
     @Transactional
-    public UserUpdateResponse updateUser(Long id, String username, String password) {
+    public UserGetInfoResponse getInfo(Long loginUserId) {
 
-        // ID 값 여부 체크
-        checkId(id);
+        User user = userRepository.findUserByIdOrElseThrow(loginUserId);
+
+        return UserGetInfoResponse.toDto(user);
+    }
+
+    // 닉네임 수정
+    @Transactional
+    public UserUpdateResponse updateUser(String username, String password, Long loginUserId) {
 
         // 유저 여부 체크
-        User user = userRepository.findUserByIdOrElseThrow(id);
+        User user = userRepository.findUserByIdOrElseThrow(loginUserId);
 
         // 비밀번호 체크
         checkPassword(password);
@@ -74,7 +88,7 @@ public class UserService {
         }
 
         // 해당 유저 닉네임 수정
-        user.setUsername(username);
+        user.update(username);
 
         // DB에 즉시 반영
         userRepository.flush();
@@ -83,15 +97,12 @@ public class UserService {
         return UserUpdateResponse.toDto(user);
     }
 
-    // 유저 삭제
+    // 유저 탈퇴
     @Transactional
-    public void deleteUser(Long id, String password) {
+    public void deleteUser(String password, Long loginUserId) {
 
-        // ID 값 여부 체크
-        checkId(id);
-
-        // 유저 여부 체크
-        User user = userRepository.findUserByIdOrElseThrow(id);
+        // 유저 정보 가져오기
+        User user = userRepository.findUserByIdOrElseThrow(loginUserId);
 
         // 비밀번호 체크
         checkPassword(password);
@@ -112,16 +123,10 @@ public class UserService {
 
     // ===== 헬퍼 메서드 =====
 
-    // ID 값 여부 체크
-    private void checkId(Long id) {
-        if (id == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID는 필수 입력값입니다");
-        }
-    }
-
+    // 비밀번호 체크
     private void checkPassword(String password) {
         if (password == null || password.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID는 필수 입력값입니다");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "비밀번호는 필수 입력값입니다");
         }
     }
 }
