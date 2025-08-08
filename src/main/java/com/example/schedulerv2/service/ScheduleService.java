@@ -2,14 +2,15 @@ package com.example.schedulerv2.service;
 
 import com.example.schedulerv2.dto.*;
 import com.example.schedulerv2.entity.Schedule;
+import com.example.schedulerv2.entity.User;
 import com.example.schedulerv2.repository.ScheduleRepository;
+import com.example.schedulerv2.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -17,105 +18,86 @@ import java.util.List;
 public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
+    private final UserRepository userRepository;
 
     // 일정 생성
     @Transactional
     public ScheduleCreateResponse save(ScheduleCreateRequest request) {
 
-        Schedule schedule = new Schedule(request.getTitle(), request.getContent(), request.getWriter());
+        // ID 값으로 user 찾기
+        User user = userRepository.findUserByIdOrElseThrow(request.getUserId());
 
+        // 일정 객체에 값 넣기
+        Schedule schedule = new Schedule(request.getTitle(), request.getContent());
+        schedule.setUser(user);
+
+        // 일정 저장
         Schedule savedSchedule = scheduleRepository.save(schedule);
 
-        return new ScheduleCreateResponse(
-                savedSchedule.getId(),
-                savedSchedule.getTitle(),
-                savedSchedule.getContent(),
-                savedSchedule.getWriter(),
-                savedSchedule.getCreatedAt(),
-                savedSchedule.getModifiedAt()
-        );
+        // 일정 반환
+        return ScheduleCreateResponse.toDto(savedSchedule);
     }
 
     // 일정 전체 조회
     @Transactional (readOnly = true)
     public List<ScheduleGetAllResponse> findAll() {
 
-        List<Schedule> findSchedule = scheduleRepository.findAll();
-
-        List<ScheduleGetAllResponse> response = new ArrayList<>();
-
-        for (Schedule schedule : findSchedule) {
-            response.add(new ScheduleGetAllResponse(
-                    schedule.getId(),
-                    schedule.getTitle(),
-                    schedule.getContent(),
-                    schedule.getWriter(),
-                    schedule.getCreatedAt(),
-                    schedule.getModifiedAt()
-            ));
-        }
-
-        return response;
+        return scheduleRepository.findAll()
+                .stream()
+                .map(ScheduleGetAllResponse::toDto)
+                .toList();
     }
 
     // 선택 일정 조회
     @Transactional (readOnly = true)
     public ScheduleGetOneResponse findById(Long id) {
 
-        // Id 값 여부 체크
+        // ID 값 여부 체크
         checkId(id);
 
         // 선택 일정 조회
         Schedule findSchedule = scheduleRepository.findByIdOrElseThrow(id);
 
-        return new ScheduleGetOneResponse(
-                findSchedule.getId(),
-                findSchedule.getTitle(),
-                findSchedule.getContent(),
-                findSchedule.getWriter(),
-                findSchedule.getCreatedAt(),
-                findSchedule.getModifiedAt()
-        );
+        // 일정 반환
+        return ScheduleGetOneResponse.toDto(findSchedule);
     }
 
     // 일정 수정
     @Transactional
-    public ScheduleUpdateResponse update(Long id, ScheduleUpdateRequest request) {
+    public ScheduleUpdateResponse update(Long id, String title, String content) {
 
-        // Id 값 여부 체크
+        // ID 값 여부 체크
         checkId(id);
 
         // 선택 일정 조회
         Schedule findSchedule = scheduleRepository.findByIdOrElseThrow(id);
 
-        if (request.getTitle() == null || request.getTitle().isBlank()) {
+        // 제목 null, 공백 체크
+        if (title == null || title.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "제목은 필수값 입니다");
         }
 
-        if (request.getContent() == null || request.getContent().isBlank()) {
+        // 내용 null, 공백 체크
+        if (content == null || content.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "내용은 필수값 입니다");
         }
 
-        findSchedule.setTitle(request.getTitle());
-        findSchedule.setContent(request.getContent());
+        // 일정 정보 업데이트
+        findSchedule.setTitle(title);
+        findSchedule.setContent(content);
 
+        // DB에 즉시 반영
         scheduleRepository.flush();
 
-        return new ScheduleUpdateResponse(
-                findSchedule.getId(),
-                findSchedule.getTitle(),
-                findSchedule.getContent(),
-                findSchedule.getWriter(),
-                findSchedule.getCreatedAt(),
-                findSchedule.getModifiedAt()
-        );
+        // 수정된 일정 반환
+        return ScheduleUpdateResponse.toDto(findSchedule);
     }
 
     // 일정 삭제
     @Transactional
     public void delete(Long id) {
 
-        // Id 값 여부 체크
+        // ID 값 여부 체크
         checkId(id);
 
         // 선택 일정 조회
@@ -133,7 +115,7 @@ public class ScheduleService {
 
     // ===== 헬퍼 메서드 =====
 
-    // Id 값 여부 체크
+    // ID 값 여부 체크
     private void checkId(Long id) {
         if (id == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID는 필수 입력값입니다");
