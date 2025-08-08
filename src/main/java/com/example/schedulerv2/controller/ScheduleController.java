@@ -36,7 +36,7 @@ public class ScheduleController {
 
     // 선택 일정 조회
     @GetMapping("/{id}")
-    public ResponseEntity<ScheduleGetOneResponse> findById(@PathVariable Long id) {
+    public ResponseEntity<ScheduleGetOneResponse> findById(@PathVariable long id) {
 
         ScheduleGetOneResponse response = scheduleService.findById(id);
 
@@ -46,18 +46,18 @@ public class ScheduleController {
     // 일정 수정
     @PutMapping("/{id}")
     public ResponseEntity<ScheduleUpdateResponse> update(
-            @PathVariable Long id,
+            @PathVariable long id,
             @RequestBody ScheduleUpdateRequest request
     ) {
 
-        ScheduleUpdateResponse response = scheduleService.update(id, request);
+        ScheduleUpdateResponse response = scheduleService.update(id, request.getTitle(), request.getContent());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     // 일정 삭제
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable long id) {
 
         scheduleService.delete(id);
     }

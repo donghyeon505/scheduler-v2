@@ -9,11 +9,11 @@ public class ScheduleCreateRequest {
 
     private final String content;
 
-    private final String writer;
+    private final Long userId;
 
-    public ScheduleCreateRequest(String title, String content, String writer) {
+    public ScheduleCreateRequest(String title, String content, Long userId) {
         this.title = title;
         this.content = content;
-        this.writer = writer;
+        this.userId = userId;
     }
 }
