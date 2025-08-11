@@ -47,13 +47,13 @@ public class ScheduleController {
 
     // 선택 일정 조회
     @GetMapping("/{scheduleId}")
-    public ResponseEntity<ScheduleGetOneResponse> findById(
+    public ResponseEntity<ScheduleGetWithCommentResponse> findById(
             @PathVariable @NotNull(message = "일정 ID는 필수값입니다.")
             @Positive(message = "일정 ID는 1 이상의 값이어야 합니다.")
             Long scheduleId
     ) {
 
-        ScheduleGetOneResponse response = scheduleService.findById(scheduleId);
+        ScheduleGetWithCommentResponse response = scheduleService.findById(scheduleId);
 
         return ResponseEntity.ok(response);
     }
@@ -103,5 +103,4 @@ public class ScheduleController {
         HttpSession session = request.getSession(false);
         return (Long) session.getAttribute("LOGIN_USER");
     }
-
 }

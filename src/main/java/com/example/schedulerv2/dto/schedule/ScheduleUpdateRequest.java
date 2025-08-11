@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public class ScheduleUpdateRequest {
 
-    @NotBlank(message = "제목을 필수 입력 항목입니다.")
+    @NotBlank(message = "제목은 필수 입력 항목입니다.")
     @Size(max = 20, message = "제목은 20자 이내여야 합니다.")
     private final String title;
 
