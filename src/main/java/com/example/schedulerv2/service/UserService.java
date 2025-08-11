@@ -1,5 +1,6 @@
 package com.example.schedulerv2.service;
 
+import com.example.schedulerv2.config.PasswordEncoder;
 import com.example.schedulerv2.dto.user.*;
 import com.example.schedulerv2.entity.Schedule;
 import com.example.schedulerv2.entity.User;
@@ -19,16 +20,19 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ScheduleRepository scheduleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // 회원가입
     @Transactional
-    public UserCreateResponse create(UserCreateRequest userCreateRequest) {
+    public UserCreateResponse create(UserCreateRequest request) {
+
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
 
         // 유저 객체 만들어서 정보 저장
         User user = new User(
-                userCreateRequest.getUsername(),
-                userCreateRequest.getEmail(),
-                userCreateRequest.getPassword()
+                request.getUsername(),
+                request.getEmail(),
+                encodedPassword
         );
 
         // DB에 유저 정보 저장
@@ -46,9 +50,7 @@ public class UserService {
         User user = userRepository.findUserByEmailOrElseThrow(request.getEmail());
 
         // 해당 유저의 비밀번호 일치여부
-        if (!user.getPassword().equals(request.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일이나 비밀번호가 일치하지 않습니다.");
-        }
+        checkPassword(request.getPassword(), user.getPassword(), "이메일이나 비밀번호가 일치하지 않습니다.");
 
         // 반환
         return user;
@@ -70,10 +72,8 @@ public class UserService {
         // 유저 여부 체크
         User user = userRepository.findUserByIdOrElseThrow(loginUserId);
 
-        // 비밀번호가 비교
-        if (!user.getPassword().equals(request.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
+        // 해당 유저의 비밀번호 일치여부
+        checkPassword(request.getPassword(), user.getPassword(), "비밀번호가 일치하지 않습니다");
 
         // 해당 유저 닉네임 수정
         user.update(request.getUsername());
@@ -100,5 +100,19 @@ public class UserService {
 
         // DB에 유저 정보 삭제
         userRepository.delete(user);
+    }
+
+
+
+
+
+
+    // ===== 헬퍼 메서드 =====
+
+    // 본인 게시물인지 체크
+    private void checkPassword(String rawPassword, String encodedPassword, String message) {
+        if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, message);
+        }
     }
 }
