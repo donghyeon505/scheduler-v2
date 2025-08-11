@@ -2,8 +2,10 @@ package com.example.schedulerv2.service;
 
 import com.example.schedulerv2.config.PasswordEncoder;
 import com.example.schedulerv2.dto.user.*;
+import com.example.schedulerv2.entity.Comment;
 import com.example.schedulerv2.entity.Schedule;
 import com.example.schedulerv2.entity.User;
+import com.example.schedulerv2.repository.CommentRepository;
 import com.example.schedulerv2.repository.ScheduleRepository;
 import com.example.schedulerv2.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ScheduleRepository scheduleRepository;
+    private final CommentRepository commentRepository;
     private final PasswordEncoder passwordEncoder;
 
     // 회원가입
@@ -92,11 +95,13 @@ public class UserService {
         // 유저 정보 가져오기
         User user = userRepository.findUserByIdOrElseThrow(loginUserId);
 
-        // 해당 유저의 일정 가져오기
+        // 해당 유저의 일정 및 댓글 가져오기
         List<Schedule> schedule = scheduleRepository.findAllByUserId(loginUserId);
+        List<Comment> comments = commentRepository.findAllByUserId(loginUserId);
 
-        // 해당 유저의 일정 전부 삭제
+        // 해당 유저의 일정 및 댓글 전부 삭제
         scheduleRepository.deleteAll(schedule);
+        commentRepository.deleteAll(comments);
 
         // DB에 유저 정보 삭제
         userRepository.delete(user);
