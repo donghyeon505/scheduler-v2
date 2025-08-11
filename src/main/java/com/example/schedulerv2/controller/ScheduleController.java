@@ -4,6 +4,9 @@ import com.example.schedulerv2.dto.schedule.*;
 import com.example.schedulerv2.service.ScheduleService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,18 +24,14 @@ public class ScheduleController {
     // 일정 생성
     @PostMapping
     public ResponseEntity<ScheduleCreateResponse> createSchedule(
-            @RequestBody ScheduleCreateRequest scheduleRequest,
+            @RequestBody @Valid ScheduleCreateRequest scheduleRequest,
             HttpServletRequest request
     ) {
 
         // session 에서 loginUserId 가져오기
-        HttpSession session = request.getSession(false);
-        Long loginUserId = (Long) session.getAttribute("LOGIN_USER");
+        Long loginUserId = getLoginUserId(request);
 
-        ScheduleCreateResponse response = scheduleService.save(
-                scheduleRequest,
-                loginUserId
-        );
+        ScheduleCreateResponse response = scheduleService.save(scheduleRequest, loginUserId);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -43,52 +42,66 @@ public class ScheduleController {
 
         List<ScheduleGetAllResponse> response = scheduleService.findAll();
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 
     // 선택 일정 조회
     @GetMapping("/{scheduleId}")
-    public ResponseEntity<ScheduleGetOneResponse> findById(@PathVariable Long scheduleId) {
+    public ResponseEntity<ScheduleGetOneResponse> findById(
+            @PathVariable @NotNull(message = "일정 ID는 필수값입니다.")
+            @Positive(message = "일정 ID는 1 이상의 값이어야 합니다.")
+            Long scheduleId
+    ) {
 
         ScheduleGetOneResponse response = scheduleService.findById(scheduleId);
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 
     // 일정 수정
     @PutMapping("/{scheduleId}")
     public ResponseEntity<ScheduleUpdateResponse> update(
-            @PathVariable Long scheduleId,
-            @RequestBody ScheduleUpdateRequest scheduleRequest,
+            @PathVariable @NotNull(message = "일정 ID는 필수값입니다.")
+            @Positive(message = "일정 ID는 1 이상의 값이어야 합니다.")
+            Long scheduleId,
+            @RequestBody @Valid ScheduleUpdateRequest scheduleRequest,
             HttpServletRequest request
     ) {
 
         // session 에서 loginUserId 가져오기
-        HttpSession session = request.getSession(false);
-        Long loginUserId = (Long) session.getAttribute("LOGIN_USER");
+        Long loginUserId = getLoginUserId(request);
 
-        ScheduleUpdateResponse response = scheduleService.update(
-                scheduleId,
-                scheduleRequest.getTitle(),
-                scheduleRequest.getContent(),
-                loginUserId
-        );
+        ScheduleUpdateResponse response = scheduleService.update(scheduleId, scheduleRequest, loginUserId);
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 
     // 일정 삭제
     @DeleteMapping("/{scheduleId}")
     public void delete(
-            @PathVariable Long scheduleId,
+            @PathVariable @NotNull(message = "일정 ID는 필수값입니다.")
+            @Positive(message = "일정 ID는 1 이상의 값이어야 합니다.")
+            Long scheduleId,
             HttpServletRequest request
     ) {
 
         // session 에서 loginUserId 가져오기
-        HttpSession session = request.getSession(false);
-        Long loginUserId = (Long) session.getAttribute("LOGIN_USER");
+        Long loginUserId = getLoginUserId(request);
 
         scheduleService.delete(scheduleId, loginUserId);
+    }
+
+
+
+
+
+
+    // ===== 헬퍼 메서드 =====
+
+    // session 에서 loginUserId 가져오기
+    private Long getLoginUserId(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        return (Long) session.getAttribute("LOGIN_USER");
     }
 
 }

@@ -5,6 +5,7 @@ import com.example.schedulerv2.entity.User;
 import com.example.schedulerv2.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class UserController {
 
     // 회원가입
     @PostMapping("/signup")
-    public ResponseEntity<UserCreateResponse> createUser(@RequestBody UserCreateRequest request) {
+    public ResponseEntity<UserCreateResponse> createUser(@RequestBody @Valid UserCreateRequest request) {
 
         UserCreateResponse response = userService.create(request);
 
@@ -29,11 +30,11 @@ public class UserController {
     // 로그인
     @PostMapping("/login")
     public ResponseEntity<String> Login(
-            @RequestBody UserLoginRequest userRequest,
+            @RequestBody @Valid UserLoginRequest userRequest,
             HttpServletRequest request
     ) {
         // 유저 정보 찾기
-        User user = userService.login(userRequest.getEmail(), userRequest.getPassword());
+        User user = userService.login(userRequest);
 
         // session 쿠키 발급 및 메모리에 세션 저장
         HttpSession session = request.getSession();
@@ -47,12 +48,8 @@ public class UserController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request) {
 
-        HttpSession session = request.getSession(false);
-
-        // 세션이 존재하는 경우 해당 세션 데이터를 삭제
-        if (session != null) {
-            session.invalidate();
-        }
+        // 로그아웃
+        deleteSession(request);
 
         return new ResponseEntity<>("로그아웃 되었습니다.", HttpStatus.OK);
     }
@@ -62,8 +59,7 @@ public class UserController {
     public ResponseEntity<UserGetInfoResponse> getUserInfo(HttpServletRequest request) {
 
         // session 에서 loginUserId 가져오기
-        HttpSession session = request.getSession(false);
-        Long loginUserId = (Long) session.getAttribute("LOGIN_USER");
+        Long loginUserId = getLoginUserId(request);
 
         // 정보 찾기
         UserGetInfoResponse response = userService.getInfo(loginUserId);
@@ -74,20 +70,15 @@ public class UserController {
     // 유저 닉네임 변경
     @PutMapping("/me")
     public ResponseEntity<UserUpdateResponse> updateUser(
-            @RequestBody UserUpdateRequest userRequest,
+            @RequestBody @Valid UserUpdateRequest userRequest,
             HttpServletRequest request
     ) {
 
         // session 에서 loginUserId 가져오기
-        HttpSession session = request.getSession(false);
-        Long loginUserId = (Long) session.getAttribute("LOGIN_USER");
+        Long loginUserId = getLoginUserId(request);
 
         // 닉네임 변경
-        UserUpdateResponse response = userService.updateUser(
-                userRequest.getUsername(),
-                userRequest.getPassword(),
-                loginUserId
-        );
+        UserUpdateResponse response = userService.updateUser(userRequest, loginUserId);
 
         // 수정된 정보 반환
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -95,16 +86,34 @@ public class UserController {
 
     // 유저 탈퇴
     @DeleteMapping("/me")
-    public void deleteUser(
-            @RequestBody UserDeleteRequest userRequest,
-            HttpServletRequest request
-    ) {
+    public void deleteUser(HttpServletRequest request) {
 
         // session 에서 loginUserId 가져오기
-        HttpSession session = request.getSession(false);
-        Long loginUserId = (Long) session.getAttribute("LOGIN_USER");
+        Long loginUserId = getLoginUserId(request);
 
         // 유저 탈퇴
-        userService.deleteUser(userRequest.getPassword(), loginUserId);
+        userService.deleteUser(loginUserId);
+
+        // 탈퇴와 함께 로그아웃
+        deleteSession(request);
+    }
+
+
+
+
+
+
+    // ===== 헬퍼 메서드 =====
+
+    // session 에서 loginUserId 가져오기
+    private Long getLoginUserId(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        return (Long) session.getAttribute("LOGIN_USER");
+    }
+
+    // 로그아웃
+    private void deleteSession(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        session.invalidate();
     }
 }

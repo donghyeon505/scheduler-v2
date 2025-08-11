@@ -5,10 +5,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
+
+    List<Schedule> findAllByUserId(Long loginUserId);
 
     default Schedule findByIdOrElseThrow(long id) {
         return findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "id 값은 필수 입니다."));
     }
+
 }
