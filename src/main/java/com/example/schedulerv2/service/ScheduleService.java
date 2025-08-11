@@ -52,9 +52,6 @@ public class ScheduleService {
     @Transactional (readOnly = true)
     public ScheduleGetOneResponse findById(Long id) {
 
-        // ID 값 여부 체크
-        checkId(id);
-
         // 선택 일정 조회
         Schedule findSchedule = scheduleRepository.findByIdOrElseThrow(id);
 
@@ -64,10 +61,7 @@ public class ScheduleService {
 
     // 일정 수정
     @Transactional
-    public ScheduleUpdateResponse update(Long id, String title, String content, Long loginUserId) {
-
-        // ID 값 여부 체크
-        checkId(id);
+    public ScheduleUpdateResponse update(Long id, ScheduleUpdateRequest request, Long loginUserId) {
 
         // 선택 일정 조회
         Schedule findSchedule = scheduleRepository.findByIdOrElseThrow(id);
@@ -75,20 +69,10 @@ public class ScheduleService {
         // 본인 게시물인지 확인
         checkSchedule(findSchedule.getUser().getId(), loginUserId, "본인의 일정만 수정할 수 있습니다.");
 
-        // 제목 null, 공백 체크
-        if (title == null || title.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "제목은 필수값 입니다");
-        }
-
-        // 내용 null, 공백 체크
-        if (content == null || content.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "내용은 필수값 입니다");
-        }
-
         // 일정 정보 업데이트
-        findSchedule.update(title, content);
+        findSchedule.update(request.getTitle(), request.getContent());
 
-        // DB에 즉시 반영
+        // DB에 즉시 반영 (수정일을 바로 보기위함)
         scheduleRepository.flush();
 
         // 수정된 일정 반환
@@ -98,9 +82,6 @@ public class ScheduleService {
     // 일정 삭제
     @Transactional
     public void delete(Long id, Long loginUserId) {
-
-        // ID 값 여부 체크
-        checkId(id);
 
         // 선택 일정 조회
         Schedule findSchedule = scheduleRepository.findByIdOrElseThrow(id);
@@ -119,13 +100,6 @@ public class ScheduleService {
 
 
     // ===== 헬퍼 메서드 =====
-
-    // ID 값 여부 체크
-    private void checkId(Long id) {
-        if (id == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID는 필수 입력값입니다");
-        }
-    }
 
     // 본인 게시물인지 체크
     private void checkSchedule(Long scheduleOwnerId, Long loginUserId, String message) {
