@@ -9,6 +9,9 @@ import com.example.schedulerv2.repository.CommentRepository;
 import com.example.schedulerv2.repository.ScheduleRepository;
 import com.example.schedulerv2.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,14 +49,13 @@ public class ScheduleService {
 
     // 일정 전체 조회
     @Transactional (readOnly = true)
-    public List<ScheduleGetAllResponse> findAll() {
+    public Page<ScheduleGetAllResponse> findAll(int page, int size) {
 
-        // 전체 조회후 수정일 기준으로 내림차순 정렬 후 DTO로 변환
-        return scheduleRepository.findAll()
-                .stream()
-                .sorted(Comparator.comparing(Schedule::getModifiedAt).reversed())
-                .map(ScheduleGetAllResponse::toDto)
-                .toList();
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Schedule> schedulePage = scheduleRepository.findAllByOrderByModifiedAtDesc(pageable);
+
+        return schedulePage.map(ScheduleGetAllResponse::toDto);
     }
 
     // 선택 일정 조회
