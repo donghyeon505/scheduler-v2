@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,11 +39,14 @@ public class ScheduleController {
 
     // 일정 전체 조회
     @GetMapping
-    public ResponseEntity<List<ScheduleGetAllResponse>> findAll() {
+    public ResponseEntity<Page<ScheduleGetAllResponse>> findAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
 
-        List<ScheduleGetAllResponse> response = scheduleService.findAll();
+        Page<ScheduleGetAllResponse> schedulePage = scheduleService.findAll(page, size);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(schedulePage);
     }
 
     // 선택 일정 조회
