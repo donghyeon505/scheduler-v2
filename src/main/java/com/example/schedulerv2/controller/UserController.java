@@ -55,7 +55,7 @@ public class UserController {
     }
 
     // 본인 계정 정보 보기
-    @GetMapping
+    @GetMapping("/me")
     public ResponseEntity<UserGetInfoResponse> getUserInfo(HttpServletRequest request) {
 
         // session 에서 loginUserId 가져오기

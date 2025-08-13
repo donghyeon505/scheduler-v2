@@ -19,7 +19,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -107,6 +106,12 @@ public class ScheduleService {
 
         // 본인 게시물인지 확인
         checkSchedule(findSchedule.getUser().getId(), loginUserId, "본인의 일정만 삭제할 수 있습니다.");
+
+        // 해당 게시물의 댓글들 조회
+        List<Comment> findComments = commentRepository.findAllByScheduleId(id);
+
+        // 댓글들 삭제
+        commentRepository.deleteAll(findComments);
 
         // 일정 삭제
         scheduleRepository.delete(findSchedule);
