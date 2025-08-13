@@ -28,6 +28,11 @@ public class LoginFilter implements Filter {
 
             HttpSession session = httpRequest.getSession(false);
 
+            if ("GET".equals(httpRequest.getMethod()) && PatternMatchUtils.simpleMatch("/schedules*", requestURI)) {
+                chain.doFilter(request, response);
+                return;
+            }
+
             if (session == null || session.getAttribute("LOGIN_USER") == null) {
                 httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "로그인 해주세요");
                 return;
