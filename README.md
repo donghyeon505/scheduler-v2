@@ -5,14 +5,14 @@ Spring 심화 과제
 # API 명세서
 
 ## 속성
-(최대 20자)
+
 ### 유저
 | 필드명     | 타입        | 필수 | 설명                         | 
 |-----------|------------|-----|------------------------------|
 | id        | Long       | X   | 유저 ID (PK, 자동생성)         |
-| username  | String     | O   | 유저 닉네임 (최소 2, 최대 10)   |
-| email     | String     | O   | 이메일 (로그인 시 ID, 최대 320) |
-| password  | String     | O   | 비밀번호 (최소 4, 최대 20)      |
+| username  | String     | O   | 유저 닉네임 (최소 2, 최대 10자)   |
+| email     | String     | O   | 이메일 (로그인 시 ID, 최대 320자) |
+| password  | String     | O   | 비밀번호 (최소 4, 최대 20자)      |
 | createdAt | datetime   | X	| 등록일 (자동 생성)              | 
 | modifiedAt| datetime	  | X	| 수정일 (자동 생성)              |
 
@@ -46,16 +46,16 @@ Spring 심화 과제
 | 로그아웃   | POST   | /users/logout | O       | 로그아웃을 합니다 (세션 제거)                         |
 | 정보 조회  | GET    | /users/me     | O       | 자신의 정보를 조회합니다                             |
 | 닉네임 변경| PUT    | /users/me     | O       | 자신의 닉네임을 변경합니다                            |
-| 회원 탈퇴  | DELETE | /users/me     | O       | 회원 탈퇴를 합니다 (자신의 일정과 댓글 제거 및 세션 제거) |
+| 회원 탈퇴  | DELETE | /users/me     | O       | 회원 탈퇴를 합니다<br>(자신의 일정과 댓글 제거 및 세션 제거) |
 
 ### 일정(Schedule) API
 | 기능          | 메서드    | 엔드포인트                 | 로그인 여부 | 설명                                                   |
 |--------------|----------|--------------------------|-----------|--------------------------------------------------------|
 | 일정 생성      | POST     | /schedules               | O         | 일정을 생성합니다                                         |
-| 일정 조회      | GET      | /schedules               | X         | 일정을 전체 조회합니다 (페이지 default page = 0, size = 10) |
+| 일정 조회      | GET      | /schedules               | X         | 일정을 전체 조회합니다<br>(페이지 default page = 0, size = 10) |
 | 단건 일정 조회  | GET      | /schedules/{scheduleId}  | X         | 해당 일정을 조회합니다 (댓글포함)                           |
 | 일정 수정      | PUT      | /schedules/{scheduleId}  | O         | 자신의 일정을 수정합니다                                   |
-| 일정 삭제      | DELETE   | /schedules/{scheduleId}  | O         | 자신의 일정을 삭제합니다 (해당 일정의 댓글도 삭제)             |
+| 일정 삭제      | DELETE   | /schedules/{scheduleId}  | O         | 자신의 일정을 삭제합니다<br>(해당 일정의 댓글도 삭제)             |
 
 ### 댓글(Comment) API 
 | 기능          | 메서드    | 엔드포인트                          | 로그인 여부 | 설명                       |
@@ -86,7 +86,7 @@ Spring 심화 과제
 
 ### 1-1 회원가입
 
-#### ===== Request =====
+**===== Request =====**
 ```json
 {
   "username": "닉네임1",
@@ -95,7 +95,7 @@ Spring 심화 과제
 }
 ```
 
-#### ===== Response ===== (201 CREATED)
+**===== Response ===== (201 CREATED)**
 ```json
 {
   "id": "1",
@@ -108,7 +108,7 @@ Spring 심화 과제
 
 ### 1-2 로그인
 
-#### ===== Request =====
+**===== Request =====**
 ```json
 {
   "email": "이메일1@gmail.com",
@@ -116,17 +116,19 @@ Spring 심화 과제
 }
 ```
 
-#### ===== Response ===== (200 OK)
+**===== Response ===== (200 OK)**
+
 닉네임1님 반갑습니다.
 
 ### 1-3 로그아웃
 
-#### ===== Response ===== (200 OK)
+**===== Response ===== (200 OK)**
+
 로그아웃 되었습니다.
 
 ### 1-4 정보 조회
 
-#### ===== Response ===== (200 OK)
+**===== Response ===== (200 OK)**
 ```json
 {
   "id": "1",
@@ -139,7 +141,7 @@ Spring 심화 과제
 
 ### 1-5 닉네임 변경
 
-#### ===== Request =====
+**===== Request =====**
 ```json
 {
   "username": "수정된 닉네임1",
@@ -147,7 +149,7 @@ Spring 심화 과제
 }
 ```
 
-#### ===== Response ===== (200 OK)
+**===== Response ===== (200 OK)**
 ```json
 {
   "id": "1",
@@ -162,7 +164,7 @@ Spring 심화 과제
 
 ### 2-1 일정 생성
 
-#### ===== Request =====
+**===== Request =====**
 ```json
 {
   "title": "세션 제목1",
@@ -170,7 +172,7 @@ Spring 심화 과제
 }
 ```
 
-#### ===== Response ===== (201 CREATED)
+**===== Response ===== (201 CREATED)**
 ```json
 {
   "id": 1,
@@ -188,7 +190,7 @@ Spring 심화 과제
 | page    | int   | 페이지 번호        | 0        |
 | size    | int   | 페이지 당 일정 갯수 | 10       |
 
-#### ===== Response ===== (200 OK)
+**===== Response ===== (200 OK)**
 ```json
 {
   "content": [
@@ -231,11 +233,11 @@ Spring 심화 과제
 
 ### 2-3 단건 일정 조회
 
-#### ===== Request =====
+**===== Request =====**
 
 - path parameter: scheduleId (예시: 1)
 
-#### ===== Response ===== (200 OK)
+**===== Response ===== (200 OK)**
 ```json
 {
   "schedule": {
@@ -252,7 +254,7 @@ Spring 심화 과제
 
 ### 2-4 일정 수정
 
-#### ===== Request =====
+**===== Request =====**
 
 - path parameter: scheduleId (예시: 1)
 ```json
@@ -262,7 +264,7 @@ Spring 심화 과제
 }
 ```
 
-#### ===== Response ===== (200 OK)
+**===== Response ===== (200 OK)**
 ```json
 {
   "id": 1,
@@ -276,17 +278,17 @@ Spring 심화 과제
 
 ### 2-5 일정 삭제
 
-#### ===== Request =====
+**===== Request =====**
 
 - path parameter: scheduleId (예시: 1)
 
-#### ===== Response ===== (200 OK)
+**===== Response ===== (200 OK)**
 
 ## 3. 댓글(Comment) API
 
 ### 3-1 댓글 생성
 
-#### ===== Request =====
+**===== Request =====**
 
 - path parameter: scheduleId (예시: 1)
 ```json
@@ -295,7 +297,7 @@ Spring 심화 과제
 }
 ```
 
-#### ===== Response ===== (301 CREATED)
+**===== Response ===== (301 CREATED)**
 ```json
 {
   "id": 1,
@@ -308,7 +310,7 @@ Spring 심화 과제
 
 ### 3-2 댓글 수정
 
-#### ===== Request =====
+**===== Request =====**
 
 - path parameter: commentId (예시: 1)
 ```json
@@ -317,7 +319,7 @@ Spring 심화 과제
 }
 ```
 
-#### ===== Response ===== (200 OK)
+**===== Response ===== (200 OK)**
 ```json
 {
   "id": 1,
@@ -329,11 +331,11 @@ Spring 심화 과제
 ```
 ### 3-3 댓글 삭제
 
-#### ===== Request =====
+**===== Request =====**
 
 - path parameter: commentId (예시: 1)
 
-#### ===== Response ===== (200 OK)
+**===== Response ===== (200 OK)**
 
 
 
