@@ -22,7 +22,7 @@ Spring 심화 과제
 | id        | Long       | X    | 일정 ID (PK, 자동생성) |
 | title     | String     | O    | 일정 제목 (최대 20자)  |
 | content   | String     | O    | 일정 내용 (최대 200자) |
-| user_id   | Long       | X    | 유저 ID (FK, 자동 생성)|
+| userId   | Long       | X    | 유저 ID (FK, 자동 생성)|
 | createdAt | datetime   | X	 | 등록일 (자동 생성)      |
 | modifiedAt| datetime	  | X	 | 수정일 (자동 생성)      |
 
@@ -31,8 +31,8 @@ Spring 심화 과제
 |-------------|------------|------|-----------------------|
 | id          | Long       | X    | 댓글 ID (자동생성)      |
 | comment     | String     | O    | 댓글 (최대 100자)      |
-| user_id     | Long       | X    | 유저 ID (FK, 자동 생성) |
-| schedule_id | Long       | X    | 일정 ID (FK, 자동 생성) |
+| userId     | Long       | X    | 유저 ID (FK, 자동 생성) |
+| scheduleId | Long       | X    | 일정 ID (FK, 자동 생성) |
 | createdAt   | datetime   | X	   | 등록일 (자동 생성)       |
 | modifiedAt  | datetime   | X	   | 수정일 (자동 생성)       |
 
