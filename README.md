@@ -350,4 +350,4 @@ Spring 심화 과제
 
 # ERD
 
-<img width="578" height="539" alt="{7BC39EC9-564D-42DF-8D4B-723E9928558C}" src="https://github.com/user-attachments/assets/cf03315d-19f8-4769-9af4-c4557dfa98c4" />
+![img.png](docs/img.png)
